@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
 /*
-* Aki K. 13.10.2021
+* Aki K. 13.10.2021, updated 15.10.2021
 */
 
 const App = () => {
@@ -73,6 +73,7 @@ const CountrySpesific = ({country}) => {
       <p>population {country.population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</p>
       <Languages languages={country.languages}/>
       <img src={country.flags.png} alt={country.flag} width="150" />
+      <Weather capital={country.capital} />
     </div>
   )
 }
@@ -100,6 +101,48 @@ const Filter = (props) => {
       find countries <input value={props.newFilter} onChange={props.handleFilterChange}/>
     </div>
   )
+}
+
+const Weather = ({capital}) => {
+  //Used openweathermap.org for the weather api, this is because weatherstack.com had a limit of 250 api searches per month for free version. I quickly went over the limit.
+  //Making this work took way too much time, and for some reason if response.data was saved to weather, then accessing it with weather.main.temp didnt work.
+  //Only solution that worked was assign the values individually inside useEffect
+  //I added description because some pictures are not so clear
+  //const [weather, setWeather] = useState([]) //Didnt work when accessing nested objects
+  const [temperature, setTemp] = useState([])
+  const [description, setDescription] = useState([])
+  const [windSpeed, setWindSpeed] = useState([])
+  const [iconSource, setIconSource] = useState([])
+  const api_key = process.env.REACT_APP_API_KEY
+
+  useEffect(() => {
+    axios
+      .get(`https://api.openweathermap.org/data/2.5/weather?q=${capital[0]}&units=metric&appid=${api_key}`)
+      .then(response => {
+        //setWeather(response.data) //Didnt work when accessing nested objects
+        setTemp(response.data.main.temp)
+        setDescription(response.data.weather[0].description)
+        setIconSource(`http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`)
+        setWindSpeed(response.data.wind.speed)
+      })
+      .catch(error => console.log('Error reading weather data'))
+  }, [])
+
+  if (capital === null) {
+    return (
+      null
+    )
+  } else {
+    return (
+      <div>
+        <h2>Weather in {capital}</h2>
+        <p>Temperature: {temperature} C</p>
+        <img src={iconSource} alt={description}/>
+        <p>Description: {description}</p>
+        <p>Windspeed: {windSpeed} m/s</p>
+      </div>
+    )
+  }
 }
 
 export default App;
