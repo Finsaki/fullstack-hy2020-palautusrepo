@@ -6,16 +6,6 @@
       "id": 1
     },
     {
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523",
-      "id": 2
-    },
-    {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": 3
-    },
-    {
       "name": "Mary Poppendieck",
       "number": "39-23-6423122",
       "id": 4
@@ -24,6 +14,21 @@
       "name": "Jari Aarnio",
       "number": "01234567",
       "id": 5
+    },
+    {
+      "name": "Ada Lovelace",
+      "number": "39-44-5323523",
+      "id": 6
+    },
+    {
+      "name": "Dan Abramov",
+      "number": "12-43-234345",
+      "id": 7
+    },
+    {
+      "name": "Jarkko Jarkkonen",
+      "number": "049289175",
+      "id": 8
     }
   ]
 }
