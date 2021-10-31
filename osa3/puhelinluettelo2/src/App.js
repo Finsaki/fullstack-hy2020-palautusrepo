@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import personService from './services/persons'
 
 /*
-* Aki K. 23.09.2021, updated 22.10.2021
+* Aki K. 23.09.2021, updated 31.10.2021
 */
 
 const App = () => {
@@ -48,7 +48,7 @@ const App = () => {
       //Lets put a catch here as well if adding does not work
       //Though two different browsers can still add the same name if browser is not refreshed, should that be fixed?
       .catch(error => {
-        showErrorMessage(`Adding '${personObject.name}' failed. Reason: Unknown`)
+        showErrorMessage(`Adding '${personObject.name}' failed. Reason: ${error.response.data.error}`)
       })
     }
   }
@@ -79,7 +79,8 @@ const App = () => {
       .then((result) => showNoticeMessage(`'${changedPersonObject.name}' was edited`))
       .catch(error => {
         //I wonder if the info that was already removed in the server should now also be removed from their local view, or could just ask user to refresh browser?
-        showErrorMessage(`Editing '${changedPersonObject.name}' failed. Reason: already removed from the server`)
+        //This can be an error that the person was already removed, or user tried to replace existing person with too short name or number
+        showErrorMessage(`Editing '${changedPersonObject.name}' failed. Reason: ${error.response.data.error}`)
       })
   }
 
