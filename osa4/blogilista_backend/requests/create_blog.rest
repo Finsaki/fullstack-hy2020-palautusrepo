@@ -2,7 +2,7 @@ POST http://localhost:3003/api/blogs
 content-type: application/json
 
 {
-  "title": "Not really a blog",
+  "title": "Not really a blog either",
   "author": "Google",
   "url": "https://www.google.fi/",
   "likes": 0
