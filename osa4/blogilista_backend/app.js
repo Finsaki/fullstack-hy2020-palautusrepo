@@ -6,6 +6,7 @@ const cors = require('cors')
 const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
 const blogsRouter = require('./controllers/blogs')
+const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -26,6 +27,7 @@ app.use(middleware.morgan(':method :url :status :res[content-length] :response-t
 //--------router needs to come after cors, express.json and morgan---------
 //router <-> blogs(GET, POST, PUT...) <-> blog(Mongoose Schema)
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
 
 //--------unknownendpoint and errorhandler come after router, errorhandler needs to be last-------
 app.use(middleware.unknownEndpoint)
