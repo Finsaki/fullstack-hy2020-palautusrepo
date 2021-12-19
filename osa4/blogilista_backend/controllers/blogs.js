@@ -11,28 +11,14 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs.map(blog => blog.toJSON()))
 })
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7)
-  }
-  return null
-}
-
 //Had to change mongoose to version 5.x.x from version 6.x.x to get this to work
 //Also changed mongoose-unique-validator to version 2.x.x from 3.x.x because errors
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
 
-  //temporary solution in exercise 4.17 for adding the first user in dp as the variable for blog
-  //const user = await User.findById(body.userId)
-  //const users = await User.find({})
-  //const user = users[0]
-  // ----> now changed to post to work only with valid login token
-
-  const token = getTokenFrom(request)
-  const decodedToken = jwt.verify(token, process.env.SECRET)
-  if (!token || !decodedToken.id) {
+  //checking that token field in request matches decodedToken with envSecret value
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!request.token || !decodedToken.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
   const user = await User.findById(decodedToken.id)

@@ -24,6 +24,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser:true, useUnifiedTopology:
 app.use(cors())
 //app.use(express.static('build')) //no frontend build in use yet --> also add .eslintignore and .gitignore for build
 app.use(express.json())
+app.use(middleware.tokenExtractor)
 app.use(middleware.morgan(':method :url :status :res[content-length] :response-time ms :response-body'))
 
 //--------router needs to come after cors, express.json and morgan---------

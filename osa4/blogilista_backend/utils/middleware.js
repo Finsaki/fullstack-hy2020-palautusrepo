@@ -14,6 +14,17 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
+//This adds the token as a new field to a request for easy access from anywhere in the app
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    request.token = authorization.substring(7)
+  } else {
+    request.token = null
+  }
+  next()
+}
+
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
 
@@ -36,5 +47,6 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
   morgan,
   unknownEndpoint,
+  tokenExtractor,
   errorHandler
 }
