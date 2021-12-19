@@ -7,6 +7,7 @@ const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
 const blogsRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const logger = require('./utils/logger')
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -29,6 +30,7 @@ app.use(middleware.morgan(':method :url :status :res[content-length] :response-t
 //router <-> blogs(GET, POST, PUT...) <-> blog(Mongoose Schema)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 //--------unknownendpoint and errorhandler come after router, errorhandler needs to be last-------
 app.use(middleware.unknownEndpoint)
