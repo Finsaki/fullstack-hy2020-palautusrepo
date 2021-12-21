@@ -1,10 +1,10 @@
+const middleware = require('../utils/middleware')
 //allows to use app.use('/api/blogs', blogsRouter) in app.js
 //This route will now always be prefixed with /api/blogs so getAll from api/blogs is just /
 const blogsRouter = require('express').Router()
-const jwt = require('jsonwebtoken')
 //getting the Mongoose Schema
 const Blog = require('../models/blog')
-const User = require('../models/user')
+
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name:1 })
@@ -13,15 +13,10 @@ blogsRouter.get('/', async (request, response) => {
 
 //Had to change mongoose to version 5.x.x from version 6.x.x to get this to work
 //Also changed mongoose-unique-validator to version 2.x.x from 3.x.x because errors
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   const body = request.body
-
-  //checking that token field in request matches decodedToken with envSecret value
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!request.token || !decodedToken.id) {
-    return response.status(401).json({ error: 'token missing or invalid' })
-  }
-  const user = await User.findById(decodedToken.id)
+  //with middleware
+  const user = request.user
 
   const blog = new Blog({
     title: body.title,
@@ -38,17 +33,12 @@ blogsRouter.post('/', async (request, response) => {
   response.json(savedBlog.toJSON())
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
-
-  //checking that token field in request matches decodedToken with envSecret value
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!request.token || !decodedToken.id) {
-    return response.status(401).json({ error: 'token missing or invalid' })
-  }
-
+blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
+  //with middleware
+  const user = request.user
   //checking if tokenid and blog's userid match
   const blog = await Blog.findById(request.params.id)
-  if (blog.user.toString() === decodedToken.id.toString()) {
+  if (blog.user.toString() === user._id.toString()) {
     await Blog.findByIdAndRemove(request.params.id)
     return response.status(204).end()
   }

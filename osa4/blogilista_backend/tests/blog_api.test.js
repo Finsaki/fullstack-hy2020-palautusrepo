@@ -7,13 +7,38 @@ const bcrypt = require('bcryptjs')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
+//used to access the token for authorization
+let loggedInToken
+//new array to house initialBlogs with associated user._id values
+let initialBlogsWithUser
+
+//Logging in a test user for tests and extracting the token
+//Also updating the initialBlogs with userid so that authorization can be tested when deleting (and later modifying?) posts
+beforeAll(async () => {
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  await user.save()
+  const res = await api
+    .post('/api/login/')
+    .send({
+      username: 'root',
+      password: 'sekret'
+    })
+  loggedInToken = res.body.token
+  //Updating the blogs with a user id
+  //initialBlogsWithUser is only used in "Testing blogs -> beforeEach", helper.initialBlogs can still be used to check length
+  initialBlogsWithUser = helper.initialBlogs.map(blog => ({ user: user._id, ...blog }))
+})
+
 describe('Testing blogs', () => {
 
   beforeEach(async () => {
     await Blog.deleteMany({})
-    await Blog.insertMany(helper.initialBlogs)
+    await Blog.insertMany(initialBlogsWithUser)
   })
 
+  //Get commands do not yet utilize authorization (add middleware to "blogs.js -> blogsRouter.get" if needed)
   describe('Getting blogs', () => {
 
     test('blogs are returned as json', async () => {
@@ -49,6 +74,7 @@ describe('Testing blogs', () => {
 
       await api
         .post('/api/blogs')
+        .set({ Authorization: `bearer ${loggedInToken}` })
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -70,6 +96,7 @@ describe('Testing blogs', () => {
 
       await api
         .post('/api/blogs')
+        .set({ Authorization: `bearer ${loggedInToken}` })
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -95,8 +122,44 @@ describe('Testing blogs', () => {
 
       await api
         .post('/api/blogs')
+        .set({ Authorization: `bearer ${loggedInToken}` })
         .send(newBlog)
         .expect(400)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+    })
+
+    test('a valid blog can not be added without authorization ', async () => {
+      const newBlog = {
+        title: 'How to Create React App in 5 Minutes?',
+        author: 'Anna Danilec',
+        url: 'https://www.blog.duomly.com/how-to-create-react-app-in-5-minutes/',
+        likes: 6
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+    })
+
+    test('a valid blog can not be added with invalid authorization ', async () => {
+      const newBlog = {
+        title: 'How to Create React App in 5 Minutes?',
+        author: 'Anna Danilec',
+        url: 'https://www.blog.duomly.com/how-to-create-react-app-in-5-minutes/',
+        likes: 6
+      }
+
+      await api
+        .post('/api/blogs')
+        .set({ Authorization: 'bearer invalidToken' })
+        .send(newBlog)
+        .expect(401)
 
       const blogsAtEnd = await helper.blogsInDb()
       expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
@@ -112,6 +175,7 @@ describe('Testing blogs', () => {
 
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
+        .set({ Authorization: `bearer ${loggedInToken}` })
         .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
@@ -125,8 +189,42 @@ describe('Testing blogs', () => {
       expect(titles).not.toContain(blogToDelete.title)
     })
 
+    test('a blog can not be deleted without authorization', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToDelete = blogsAtStart[0]
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+      const titles = blogsAtEnd.map(r => r.title)
+
+      expect(titles).toContain(blogToDelete.title)
+    })
+
+    test('a blog can not be deleted with invalid authorization', async () => {
+      const blogsAtStart = await helper.blogsInDb()
+      const blogToDelete = blogsAtStart[0]
+
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set({ Authorization: 'bearer invalidToken' })
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+      const titles = blogsAtEnd.map(r => r.title)
+
+      expect(titles).toContain(blogToDelete.title)
+    })
+
   })
 
+  //Put commands do not yet utilize authorization (add middleware to "blogs.js -> blogsRouter.put" if needed)
   describe('Modifying blogs', () => {
 
     test('a blog can be modified', async () => {

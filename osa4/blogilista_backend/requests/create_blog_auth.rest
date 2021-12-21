@@ -1,10 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImtheXR0YWphMiIsImlkIjoiNjFiMTAxNGZiY2ZkMTRlMGU2NTZjOWUzIiwiaWF0IjoxNjM5OTI2NTI1LCJleHAiOjE2Mzk5MzAxMjV9.Bai7jiPpUYm_n_DSvPhDtZvAQJwFJQZuYrCKqVJuDRw
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImtheXR0YWphMiIsImlkIjoiNjFiMTAxNGZiY2ZkMTRlMGU2NTZjOWUzIiwiaWF0IjoxNjQwMDg2MzExLCJleHAiOjE2NDAwODk5MTF9.pMRwptyPP6yPtZ93px0UMWc3u7leQS0YDvj_mY00VzU
 
 {
-  "title": "This is post num 1 authorized by kayttaja2",
+  "title": "This is post num 3 authorized by kayttaja2",
   "author": "Google",
   "url": "https://www.google.fi/",
-  "likes": 6
+  "likes": 8
 }
