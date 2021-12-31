@@ -73,6 +73,29 @@ const App = () => {
     }
   }
 
+  const handleLikes = async id => {
+    try {
+      const likedBlog = await blogs.find((blog) => blog.id === id)
+      const likes = likedBlog.likes += 1
+
+      const blogObject = {
+        title: likedBlog.title,
+        author: likedBlog.author,
+        url: likedBlog.url,
+        likes: likes,
+        user: likedBlog.user.id
+      }
+
+      const returnedBlog = await blogService.update(likedBlog.id, blogObject)
+      setBlogs(blogs.map(blog => blog.id !== returnedBlog.id
+        ? blog
+        : likedBlog))
+    } catch (exception) {
+      showErrorMessage('Like failed - Please try again')
+    }
+    
+  }
+
   const showNoticeMessage = (message) => {
     //clearing out message if previous one is still visible
     setNotificationMessage(null)
@@ -104,7 +127,7 @@ const App = () => {
       <p></p>
       {blogs.map(blog =>
         <div key={blog.id}>
-          <Blog blog={blog} />
+          <Blog blog={blog} handleLikes={() => handleLikes(blog.id)}/>
         </div>
       )}
     </div>  
