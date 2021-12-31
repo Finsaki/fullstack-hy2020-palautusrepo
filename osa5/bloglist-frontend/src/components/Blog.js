@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
-const Blog = ({ blog, handleLikes }) => {
+const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
+
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -9,24 +10,31 @@ const Blog = ({ blog, handleLikes }) => {
     marginBottom: 5
   }
   const [blogInfoVisible, setBlogInfoVisible] = useState(false)
-  
 
-const showAllInfo = () => (
-  <div>
+  //Backend only populates user information on get method ->
+  //so blog.user.name is not immediatelly visible without refreshing
+  //I assume this wasnt part of the Part4 exercises and does not need to be fixed
+  const showAllInfo = () => (
     <div>
-      {blog.url}
+      <div>
+        {blog.url}
+      </div>
+      <div>
+        {blog.likes}
+        <button onClick={handleLikes}>like</button>
+      </div>
+      <div>
+        {blog.user.name}
+      </div>
+      {authorization ? showDeleteButton() : null}
     </div>
+  )
+
+  const showDeleteButton = () => (
     <div>
-      {blog.likes}
-      <button onClick={handleLikes}>
-        like
-      </button>
+      <button onClick={handleDelete}>delete</button>
     </div>
-    <div>
-      {blog.user.name}
-    </div>
-  </div>  
-)
+  )
 
   return (
     <div style={blogStyle}>

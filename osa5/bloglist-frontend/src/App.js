@@ -19,9 +19,11 @@ const App = () => {
   const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    const fetchData = async () => {
+      const returnedBlogs = await blogService.getAll()
+      setBlogs(returnedBlogs)
+    }
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -33,6 +35,7 @@ const App = () => {
     }
   }, [])
 
+  //Backend doesnt use populate on post methods so username is not immediatelly visible without refreshing
   const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject)
@@ -75,7 +78,7 @@ const App = () => {
 
   const handleLikes = async id => {
     try {
-      const likedBlog = await blogs.find((blog) => blog.id === id)
+      const likedBlog = await blogs.find(blog => blog.id === id)
       const likes = likedBlog.likes += 1
 
       const blogObject = {
@@ -85,7 +88,8 @@ const App = () => {
         likes: likes,
         user: likedBlog.user.id
       }
-
+      //Backend only populates user information on get method ->
+      //so likedBlog is used here instead of returnedBlog
       const returnedBlog = await blogService.update(likedBlog.id, blogObject)
       setBlogs(blogs.map(blog => blog.id !== returnedBlog.id
         ? blog
@@ -94,6 +98,30 @@ const App = () => {
       showErrorMessage('Like failed - Please try again')
     }
     
+  }
+
+  const handleDelete = async id => {
+    try {
+      const blogToBeDeleted = await blogs.find(blog => blog.id === id)
+
+      if(window.confirm(`Remove ${blogToBeDeleted.title} by ${blogToBeDeleted.author}`)) {
+        await blogService.remove(blogToBeDeleted.id)
+        setBlogs(blogs.filter(blog => blog.id !== id))
+        showNoticeMessage(`Blog ${blogToBeDeleted.title} was deleted`)
+      }
+    } catch (exception) {
+      showErrorMessage('Delete failed - Please try again')
+    }
+
+  }
+
+  //Checking if current user and given blog match
+  const checkAuthorization = blog => {
+    if (blog.user.username === user.username) {
+      return true
+    } else {
+      return false
+    }
   }
 
   const showNoticeMessage = (message) => {
@@ -129,7 +157,12 @@ const App = () => {
         .sort((a,b) => b.likes - a.likes)
         .map(blog =>
           <div key={blog.id}>
-            <Blog blog={blog} handleLikes={() => handleLikes(blog.id)}/>
+            <Blog
+              blog={blog}
+              authorization={checkAuthorization(blog)}
+              handleLikes={() => handleLikes(blog.id)}
+              handleDelete={() => handleDelete(blog.id)}
+            />
           </div>
       )}
     </div>
