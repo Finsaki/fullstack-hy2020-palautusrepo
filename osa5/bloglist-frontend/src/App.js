@@ -97,7 +97,7 @@ const App = () => {
     } catch (exception) {
       showErrorMessage('Like failed - Please try again')
     }
-    
+
   }
 
   const handleDelete = async id => {
@@ -164,7 +164,7 @@ const App = () => {
               handleDelete={() => handleDelete(blog.id)}
             />
           </div>
-      )}
+        )}
     </div>
   )
 
