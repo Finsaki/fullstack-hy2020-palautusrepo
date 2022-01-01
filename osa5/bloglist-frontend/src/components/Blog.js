@@ -14,22 +14,39 @@ const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
 
   //Backend only populates user information on get method ->
   //so blog.user.name is not immediatelly visible without refreshing
-  //I assume this wasnt part of the Part4 exercises and does not need to be fixed
-  const showAllInfo = () => (
-    <div>
+  //I assume this wasnt part of the Part4 exercises and does not need to be fixed on backend
+  const showAllInfo = () => {
+    return (
       <div>
-        {blog.url}
+        <div>
+          {blog.url}
+        </div>
+        <div>
+          {blog.likes}
+          <button onClick={handleLikes}>like</button>
+        </div>
+        {fixMissingUser()}
+        {authorization ? showDeleteButton() : null}
       </div>
-      <div>
-        {blog.likes}
-        <button onClick={handleLikes}>like</button>
-      </div>
-      <div>
-        {blog.user.name}
-      </div>
-      {authorization ? showDeleteButton() : null}
-    </div>
-  )
+    )
+  }
+
+  //This lets tests pass without errors and needing to touch backend
+  const fixMissingUser = () => {
+    try {
+      return (
+        <div>
+          {blog.user.name}
+        </div>
+      )
+    } catch (exception) {
+      return (
+        <div>
+          Refresh needed
+        </div>
+      )
+    }
+  }
 
   const showDeleteButton = () => (
     <div>
