@@ -12,9 +12,7 @@ const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
   }
   const [blogInfoVisible, setBlogInfoVisible] = useState(false)
 
-  //Backend only populates user information on get method ->
-  //so blog.user.name is not immediatelly visible without refreshing
-  //I assume this wasnt part of the Part4 exercises and does not need to be fixed on backend
+  //authorization is true if user = blog.user and also if blog has no user
   const showAllInfo = () => {
     return (
       <div>
@@ -22,7 +20,7 @@ const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
           {blog.url}
         </div>
         <div>
-          {blog.likes}
+          <span id='likes'>{blog.likes}</span>
           <button onClick={handleLikes}>like</button>
         </div>
         {fixMissingUser()}
@@ -31,7 +29,8 @@ const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
     )
   }
 
-  //This lets tests pass without errors and needing to touch backend
+  //This function is used to check if blog has a valid user, if not then user is replaced with placeholder
+  //This might be redundant now that the backend is fixed (user is saved properly on post)
   const fixMissingUser = () => {
     try {
       return (
@@ -42,7 +41,7 @@ const Blog = ({ blog, authorization, handleLikes, handleDelete }) => {
     } catch (exception) {
       return (
         <div>
-          Refresh needed
+          No user associated
         </div>
       )
     }

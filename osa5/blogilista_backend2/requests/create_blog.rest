@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs
+content-type: application/json
+
+{
+  "title": "Yet another blog bites the dust",
+  "author": "Google",
+  "url": "https://www.google.fi/",
+  "likes": 42
+}

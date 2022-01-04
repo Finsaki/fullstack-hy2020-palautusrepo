@@ -28,7 +28,7 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
       if (loggedUserJSON) {
         const user = await JSON.parse(loggedUserJSON)
         setUser(user)
@@ -57,7 +57,7 @@ const App = () => {
       })
 
       window.localStorage.setItem(
-        'loggedNoteappUser', JSON.stringify(user)
+        'loggedBlogappUser', JSON.stringify(user)
       )
 
       blogService.setToken(user.token)
@@ -72,7 +72,7 @@ const App = () => {
     event.preventDefault()
     try {
       setUser(null)
-      window.localStorage.removeItem('loggedNoteappUser')
+      window.localStorage.removeItem('loggedBlogappUser')
       showNoticeMessage(`User ${user.username} logged out`)
     } catch (exception) {
       showErrorMessage('Log out failed - Please try again')
@@ -120,11 +120,17 @@ const App = () => {
 
   //Checking if current user and given blog match
   const checkAuthorization = blog => {
+    //Added this check because older stuff on mongodb had blogs without users
+    if (blog.user === null) {
+      return false
+    }
+
     if (blog.user.username === user.username) {
       return true
     } else {
       return false
     }
+
   }
 
   const showNoticeMessage = (message) => {
@@ -159,7 +165,7 @@ const App = () => {
       {blogs
         .sort((a,b) => b.likes - a.likes)
         .map(blog =>
-          <div key={blog.id}>
+          <div key={blog.id} className='blogs'>
             <Blog
               blog={blog}
               authorization={checkAuthorization(blog)}
